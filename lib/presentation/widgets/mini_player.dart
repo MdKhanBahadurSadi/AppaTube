@@ -1,9 +1,10 @@
+import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:miniplayer/miniplayer.dart';
+import '../../core/constants/app_colors.dart';
+import '../../app/routes.dart';
 import '../providers/player_provider.dart';
-import '../screens/player_screen.dart';
 
 class MiniPlayer extends ConsumerWidget {
   const MiniPlayer({super.key});
@@ -14,87 +15,143 @@ class MiniPlayer extends ConsumerWidget {
     final playerNotifier = ref.read(playerProvider.notifier);
     final video = playerState.currentVideo;
 
-    if (video == null) return const SizedBox.shrink();
+    final bool isVisible = video != null;
 
-    final double height = MediaQuery.of(context).size.height;
-
-    return Miniplayer(
-      minHeight: 70,
-      maxHeight: height,
-      builder: (miniHeight, percentage) {
-        if (percentage > 0.2) {
-          return const PlayerScreen();
-        }
-
-        // BUG-14 fix: Use milliseconds for smoother progress
-        final positionMs = playerState.position.inMilliseconds;
-        final durationMs = playerState.duration.inMilliseconds;
-        final progress = durationMs > 0 ? positionMs / durationMs : 0.0;
-
-        return Container(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          child: Column(
-            children: [
-              LinearProgressIndicator(
-                value: progress.clamp(0.0, 1.0),
-                backgroundColor: Colors.grey[300],
-                valueColor:
-                    const AlwaysStoppedAnimation<Color>(Colors.red),
-                minHeight: 2,
-              ),
-              Expanded(
-                child: Row(
-                  children: [
-                    const SizedBox(width: 8),
-                    CachedNetworkImage(
-                      imageUrl: video.thumbnailUrl,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            video.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold),
+    return AnimatedSlide(
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+      offset: isVisible ? Offset.zero : const Offset(0, 1),
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 300),
+        opacity: isVisible ? 1.0 : 0.0,
+        child: isVisible
+            ? SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
+                  child: GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, Routes.player),
+                    onVerticalDragEnd: (details) {
+                      if (details.primaryVelocity! < -200) {
+                        Navigator.pushNamed(context, Routes.player);
+                      }
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                        child: Container(
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border(
+                              top: BorderSide(
+                                color: Colors.white.withOpacity(0.1),
+                              ),
+                            ),
                           ),
-                          Text(
-                            video.channelName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                color: Colors.grey[600], fontSize: 12),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Row(
+                                    children: [
+                                      // Left: Thumbnail
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: CachedNetworkImage(
+                                          imageUrl: video.thumbnailUrl,
+                                          width: 48,
+                                          height: 48,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      // Center: Title & Channel
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              video.title,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(
+                                              video.channelName,
+                                              style: const TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      // Right: Controls
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.skip_previous_rounded,
+                                              size: 22,
+                                              color: Colors.white,
+                                            ),
+                                            onPressed: () => playerNotifier.playPrevious(),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              playerState.isPlaying
+                                                  ? Icons.pause_rounded
+                                                  : Icons.play_arrow_rounded,
+                                              size: 28,
+                                              color: AppColors.red,
+                                            ),
+                                            onPressed: () => playerNotifier.togglePlayPause(),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.skip_next_rounded,
+                                              size: 22,
+                                              color: Colors.white,
+                                            ),
+                                            onPressed: () => playerNotifier.playNext(),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              // Progress Indicator
+                              LinearProgressIndicator(
+                                value: playerState.duration.inSeconds > 0
+                                    ? playerState.position.inSeconds /
+                                        playerState.duration.inSeconds
+                                    : 0.0,
+                                minHeight: 2,
+                                backgroundColor: Colors.transparent,
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  AppColors.red,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(playerState.isPlaying
-                          ? Icons.pause
-                          : Icons.play_arrow),
-                      onPressed: () => playerNotifier.togglePlayPause(),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        // BUG-06 fix: Properly stop audio AND reset state
-                        playerNotifier.stopAndReset();
-                      },
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
+              )
+            : const SizedBox.shrink(),
+      ),
     );
   }
 }

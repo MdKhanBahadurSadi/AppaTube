@@ -10,8 +10,20 @@ import 'core/services/youtube_service.dart';
 import 'data/models/video_model.dart';
 import 'presentation/providers/player_provider.dart';
 
+import 'package:flutter/services.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Set preferred orientations
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  // Set system UI overlay style
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+    systemNavigationBarColor: Color(0xFF0A0A0A),
+  ));
 
   // Initialize Hive
   await Hive.initFlutter();
