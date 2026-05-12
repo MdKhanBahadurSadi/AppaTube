@@ -2,9 +2,12 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../app/routes.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/play_mode.dart';
 import '../../core/utils/helpers.dart';
 import '../providers/player_provider.dart';
+import '../widgets/play_mode_toggle.dart';
 
 class PlayerScreen extends ConsumerStatefulWidget {
   const PlayerScreen({super.key});
@@ -96,9 +99,15 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> with TickerProvider
                           letterSpacing: 1.5,
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.more_vert, color: Colors.white),
-                        onPressed: () {},
+                      PlayModeToggle(
+                        currentMode: playerState.playMode,
+                        onModeChanged: (mode) {
+                          if (mode == PlayMode.video) {
+                            ref.read(playerProvider.notifier).togglePlayMode();
+                            ref.read(audioHandlerProvider).pause();
+                            Navigator.pushReplacementNamed(context, Routes.videoPlayer);
+                          }
+                        },
                       ),
                     ],
                   ),

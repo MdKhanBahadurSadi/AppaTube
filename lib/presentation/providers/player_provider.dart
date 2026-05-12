@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import '../../core/constants/play_mode.dart';
 import '../../core/services/audio_handler.dart';
 import '../../data/models/video_model.dart';
 
@@ -15,6 +16,7 @@ class PlayerState {
   final int currentIndex;
   final bool isShuffled;
   final bool isRepeat;
+  final PlayMode playMode;
 
   PlayerState({
     this.currentVideo,
@@ -27,6 +29,7 @@ class PlayerState {
     this.currentIndex = -1,
     this.isShuffled = false,
     this.isRepeat = false,
+    this.playMode = PlayMode.audio,
   });
 
   /// BUG-03 fix: Use [clearError] flag to explicitly clear error.
@@ -46,6 +49,7 @@ class PlayerState {
     int? currentIndex,
     bool? isShuffled,
     bool? isRepeat,
+    PlayMode? playMode,
   }) {
     return PlayerState(
       currentVideo:
@@ -59,6 +63,7 @@ class PlayerState {
       currentIndex: currentIndex ?? this.currentIndex,
       isShuffled: isShuffled ?? this.isShuffled,
       isRepeat: isRepeat ?? this.isRepeat,
+      playMode: playMode ?? this.playMode,
     );
   }
 }
@@ -112,13 +117,18 @@ class PlayerNotifier extends Notifier<PlayerState> {
   AppAudioHandler get _handler => ref.read(audioHandlerProvider);
 
   /// Play a single video.
-  Future<void> playVideo(VideoModel video) async {
+  Future<void> playVideo(
+    VideoModel video,
+    AppAudioHandler handler, {
+    PlayMode mode = PlayMode.audio,
+  }) async {
     if (state.isLoading && state.currentVideo?.id == video.id) {
       print('[PlayerNotifier] Already loading this video, ignoring duplicate tap.');
       return;
     }
 
     state = state.copyWith(
+      playMode: mode,
       isLoading: true,
       currentVideo: video,
       clearError: true,
@@ -128,7 +138,12 @@ class PlayerNotifier extends Notifier<PlayerState> {
       position: Duration.zero,
     );
     try {
-      await _handler.playFromVideoModel(video);
+      if (mode == PlayMode.audio) {
+        await handler.playFromVideoModel(video);
+      }
+      // If mode == video, we don't call handler as per instruction
+      // (video player will handle it separately)
+
       // isPlaying will be updated by the stream listener (BUG-02 fix)
       state = state.copyWith(isLoading: false);
     } catch (e) {
@@ -144,7 +159,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
       queue: list,
       currentIndex: index >= 0 ? index : 0,
     );
-    await playVideo(video);
+    await playVideo(video, _handler);
   }
 
   /// Toggle play/pause. State is synced via stream listener.
@@ -170,7 +185,15 @@ class PlayerNotifier extends Notifier<PlayerState> {
   void toggleRepeat() =>
       state = state.copyWith(isRepeat: !state.isRepeat);
 
-  Future<void> playNext() async {
+  void togglePlayMode() {
+    state = state.copyWith(
+      playMode: state.playMode == PlayMode.audio
+          ? PlayMode.video
+          : PlayMode.audio,
+    );
+  }
+
+  Future<void> playNext([AppAudioHandler? handler]) async {
     if (state.queue.isEmpty) return;
     int nextIndex = state.currentIndex + 1;
     if (nextIndex >= state.queue.length) {
@@ -181,10 +204,10 @@ class PlayerNotifier extends Notifier<PlayerState> {
       }
     }
     state = state.copyWith(currentIndex: nextIndex);
-    await playVideo(state.queue[nextIndex]);
+    await playVideo(state.queue[nextIndex], handler ?? _handler);
   }
 
-  Future<void> playPrevious() async {
+  Future<void> playPrevious([AppAudioHandler? handler]) async {
     if (state.queue.isEmpty) return;
     int prevIndex = state.currentIndex - 1;
     if (prevIndex < 0) {
@@ -195,7 +218,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
       }
     }
     state = state.copyWith(currentIndex: prevIndex);
-    await playVideo(state.queue[prevIndex]);
+    await playVideo(state.queue[prevIndex], handler ?? _handler);
   }
 
   /// BUG-06 fix: Stop audio and fully reset player state.

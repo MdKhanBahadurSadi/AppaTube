@@ -233,10 +233,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
                 video: video,
                 heroContext: 'search_$index',
                 isPlaying: playerState.currentVideo?.id == video.id,
-                onTap: () {
-                  ref.read(playerProvider.notifier).playVideoFromList(video, state.results);
-                  ref.read(historyProvider.notifier).addToHistory(video);
-                },
               );
             },
           ),

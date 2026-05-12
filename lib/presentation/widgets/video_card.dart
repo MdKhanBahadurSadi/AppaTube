@@ -1,25 +1,206 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../app/routes.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/play_mode.dart';
 import '../../core/utils/helpers.dart';
 import '../../data/models/video_model.dart';
+import '../providers/history_provider.dart';
+import '../providers/player_provider.dart';
 
-class VideoCard extends StatelessWidget {
+class VideoCard extends ConsumerWidget {
   final VideoModel video;
-  final VoidCallback onTap;
   final bool isPlaying;
   final String heroContext;
 
   const VideoCard({
     super.key,
     required this.video,
-    required this.onTap,
     this.isPlaying = false,
     required this.heroContext,
   });
 
+  void _showModeSelectionSheet(BuildContext context, WidgetRef ref) {
+    final audioHandler = ref.read(audioHandlerProvider);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF111111),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFF333333),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Video thumbnail + title row
+            Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: CachedNetworkImage(
+                    imageUrl: video.thumbnailUrl,
+                    width: 80,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        video.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        video.channelName,
+                        style: const TextStyle(
+                          color: Color(0xFF888888),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+            const Text(
+              'How do you want to play?',
+              style: TextStyle(color: Color(0xFF666666), fontSize: 12),
+            ),
+            const SizedBox(height: 12),
+
+            // Two big buttons side by side
+            Row(
+              children: [
+                // Audio button
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      ref.read(playerProvider.notifier).playVideo(
+                            video,
+                            audioHandler,
+                            mode: PlayMode.audio,
+                          );
+                      ref.read(historyProvider.notifier).addToHistory(video);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1A1A1A),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFF2A2A2A)),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(Icons.headphones_rounded,
+                              color: Color(0xFFE40000), size: 32),
+                          SizedBox(height: 8),
+                          Text(
+                            'Audio Only',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Background play',
+                            style: TextStyle(
+                              color: Color(0xFF666666),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Video button
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      ref.read(playerProvider.notifier).playVideo(
+                            video,
+                            audioHandler,
+                            mode: PlayMode.video,
+                          );
+                      ref.read(historyProvider.notifier).addToHistory(video);
+                      Navigator.pushNamed(context, Routes.videoPlayer);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1A1A1A),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFF2A2A2A)),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(Icons.videocam_rounded,
+                              color: Color(0xFFE40000), size: 32),
+                          SizedBox(height: 8),
+                          Text(
+                            'Watch Video',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Screen stays on',
+                            style: TextStyle(
+                              color: Color(0xFF666666),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         color: isPlaying ? AppColors.red.withValues(alpha: 0.05) : Colors.transparent,
@@ -30,7 +211,7 @@ class VideoCard extends StatelessWidget {
             : null,
       ),
       child: InkWell(
-        onTap: onTap,
+        onTap: () => _showModeSelectionSheet(context, ref),
         borderRadius: BorderRadius.circular(12),
         splashColor: AppColors.red.withValues(alpha: 0.1),
         child: Padding(

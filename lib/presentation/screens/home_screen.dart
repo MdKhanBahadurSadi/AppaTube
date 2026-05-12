@@ -5,6 +5,7 @@ import '../../core/constants/app_colors.dart';
 import '../../app/routes.dart';
 import '../providers/player_provider.dart';
 import '../providers/history_provider.dart';
+import '../../core/constants/play_mode.dart';
 import '../widgets/mini_player.dart';
 import '../widgets/video_card.dart';
 import '../widgets/animated_bottom_nav.dart';
@@ -47,7 +48,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (playerState.currentVideo != null)
-                  const MiniPlayer(),
+                  playerState.playMode == PlayMode.audio
+                      ? const MiniPlayer()
+                      : Container(
+                          height: 50,
+                          color: const Color(0xFF111111),
+                          child: Row(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: Icon(Icons.videocam_rounded, color: Color(0xFFE40000), size: 20),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  playerState.currentVideo!.title,
+                                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pushNamed(context, Routes.videoPlayer),
+                                child: const Text('Resume', style: TextStyle(color: Color(0xFFE40000))),
+                              ),
+                            ],
+                          ),
+                        ),
                 AnimatedBottomNav(
                   currentIndex: _currentIndex,
                   onTap: (index) {
@@ -189,10 +215,6 @@ class _HomeView extends ConsumerWidget {
                         child: VideoCard(
                           video: video,
                           heroContext: 'continue_$index',
-                          onTap: () {
-                            ref.read(playerProvider.notifier).playVideoFromList(video, history);
-                            ref.read(historyProvider.notifier).addToHistory(video);
-                          },
                         ),
                       );
                     },
@@ -249,10 +271,6 @@ class _HomeView extends ConsumerWidget {
                   video: video,
                   heroContext: 'recent_$index',
                   isPlaying: playerState.currentVideo?.id == video.id,
-                  onTap: () {
-                    ref.read(playerProvider.notifier).playVideoFromList(video, history);
-                    ref.read(historyProvider.notifier).addToHistory(video);
-                  },
                 );
               },
               childCount: history.length,

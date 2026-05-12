@@ -64,14 +64,6 @@ class HistoryScreen extends ConsumerWidget {
                             video: video,
                             heroContext: 'history_$index',
                             isPlaying: playerState.currentVideo?.id == video.id,
-                            onTap: () {
-                              ref
-                                  .read(playerProvider.notifier)
-                                  .playVideoFromList(video, history);
-                              ref
-                                  .read(historyProvider.notifier)
-                                  .addToHistory(video);
-                            },
                           );
                         },
                       ),

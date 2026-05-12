@@ -1,0 +1,1 @@
+enum PlayMode { audio, video }

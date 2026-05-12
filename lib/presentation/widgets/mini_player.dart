@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../app/routes.dart';
+import '../../core/constants/play_mode.dart';
 import '../providers/player_provider.dart';
 
 class MiniPlayer extends ConsumerWidget {
@@ -29,7 +30,13 @@ class MiniPlayer extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
                   child: GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, Routes.player),
+                    onTap: () {
+                      if (playerState.playMode == PlayMode.audio) {
+                        Navigator.pushNamed(context, Routes.player);
+                      } else {
+                        Navigator.pushNamed(context, Routes.videoPlayer);
+                      }
+                    },
                     onVerticalDragEnd: (details) {
                       if (details.primaryVelocity! < -200) {
                         Navigator.pushNamed(context, Routes.player);
