@@ -35,7 +35,7 @@ AppaTube is a high-performance, feature-rich YouTube client built with Flutter. 
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/AppaTube.git
+   git clone https://github.com/mdkhanbahadursadi/AppaTube.git
    cd AppaTube
    ```
 
