@@ -62,6 +62,7 @@ class HistoryScreen extends ConsumerWidget {
                           final video = history[index];
                           return VideoCard(
                             video: video,
+                            heroContext: 'history_$index',
                             isPlaying: playerState.currentVideo?.id == video.id,
                             onTap: () {
                               ref

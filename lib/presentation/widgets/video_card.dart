@@ -8,12 +8,14 @@ class VideoCard extends StatelessWidget {
   final VideoModel video;
   final VoidCallback onTap;
   final bool isPlaying;
+  final String heroContext;
 
   const VideoCard({
     super.key,
     required this.video,
     required this.onTap,
     this.isPlaying = false,
+    required this.heroContext,
   });
 
   @override
@@ -40,7 +42,7 @@ class VideoCard extends StatelessWidget {
               Stack(
                 children: [
                   Hero(
-                    tag: 'thumbnail_${video.id}',
+                    tag: 'thumb_${heroContext}_${video.id}',
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: CachedNetworkImage(

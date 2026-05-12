@@ -111,7 +111,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> with TickerProvider
                   child: RotationTransition(
                     turns: _rotationController,
                     child: Hero(
-                      tag: 'thumbnail_${video.id}',
+                      tag: 'thumb_player_${video.id}',
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         width: playerState.isPlaying ? 260 : 220,

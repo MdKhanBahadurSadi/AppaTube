@@ -173,46 +173,15 @@ class _HomeView extends ConsumerWidget {
                     itemCount: history.take(5).length,
                     itemBuilder: (context, index) {
                       final video = history[index];
-                      return GestureDetector(
-                        onTap: () {
-                          ref.read(playerProvider.notifier).playVideoFromList(video, history);
-                          ref.read(historyProvider.notifier).addToHistory(video);
-                        },
-                        child: Container(
-                          width: 140,
-                          margin: const EdgeInsets.only(right: 12),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            image: DecorationImage(
-                              image: CachedNetworkImageProvider(video.thumbnailUrl),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              gradient: LinearGradient(
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                                colors: [
-                                  Colors.black.withOpacity(0.8),
-                                  Colors.transparent,
-                                ],
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(8),
-                            alignment: Alignment.bottomLeft,
-                            child: Text(
-                              video.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
+                      return SizedBox(
+                        width: 280,
+                        child: VideoCard(
+                          video: video,
+                          heroContext: 'continue_$index',
+                          onTap: () {
+                            ref.read(playerProvider.notifier).playVideoFromList(video, history);
+                            ref.read(historyProvider.notifier).addToHistory(video);
+                          },
                         ),
                       );
                     },
@@ -267,6 +236,7 @@ class _HomeView extends ConsumerWidget {
                 final video = history[index];
                 return VideoCard(
                   video: video,
+                  heroContext: 'recent_$index',
                   isPlaying: playerState.currentVideo?.id == video.id,
                   onTap: () {
                     ref.read(playerProvider.notifier).playVideoFromList(video, history);

@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../../data/models/video_model.dart';
 import 'youtube_service.dart';
 
@@ -55,48 +56,73 @@ class AppAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   Stream<ProcessingState> get processingStateStream => _player.playerStateStream.map((s) => s.processingState);
 
   Future<void> playFromVideoModel(VideoModel video) async {
-    if (_isSettingSource) {
-      print('[AudioHandler] Already setting source, ignoring duplicate request.');
-      return;
-    }
+    if (_isSettingSource) return;
     _isSettingSource = true;
 
     try {
-      print('[AudioHandler] Starting playback for: ${video.title}');
-      
-      final url = await _youtubeService.getAudioStreamUrl(video.id);
-      
-      if (url == null) {
-        print('[AudioHandler] ERROR: Could not get stream URL');
-        throw Exception('Failed to get audio stream. This might be due to YouTube rate limiting. Please try again later.');
-      }
-
-      final item = MediaItem(
+      mediaItem.add(MediaItem(
         id: video.id,
         album: 'AppaTube',
         title: video.title,
         artist: video.channelName,
         artUri: Uri.parse(video.thumbnailUrl),
         duration: video.duration,
-      );
-      mediaItem.add(item);
+      ));
 
-      await _player.setAudioSource(
-        AudioSource.uri(
-          Uri.parse(url),
-          headers: {
-            'User-Agent': 'com.google.android.youtube/19.05.36 (Linux; U; Android 14; en_US; sdk_gphone64_x86_64; Build/UE1A.230829.036.A1; FW/1)',
-            'X-YouTube-Client-Name': '3',
-            'X-YouTube-Client-Version': '19.05.36',
-            'Origin': 'https://www.youtube.com',
-            'Referer': 'https://www.youtube.com/',
-          },
-        ),
-      );
-      play();
+      final yt = YoutubeExplode();
+      try {
+        // Use androidVr client for better compatibility
+        final manifest = await yt.videos.streamsClient.getManifest(
+          video.id,
+          ytClients: [YoutubeApiClient.androidVr],
+        );
+
+        final audioStreams = manifest.audioOnly.toList()
+          ..sort((a, b) => b.bitrate.bitsPerSecond.compareTo(a.bitrate.bitsPerSecond));
+
+        if (audioStreams.isEmpty) {
+          print('[AudioHandler] No audio streams found for ${video.id}');
+          return;
+        }
+
+        final streamInfo = audioStreams.first;
+        final streamUrl = streamInfo.url.toString();
+
+        // Use LockCachingAudioSource for proper byte-range support and Android User-Agent to bypass 403
+        await _player.setAudioSource(
+          LockCachingAudioSource(
+            Uri.parse(streamUrl),
+            headers: {
+              'User-Agent': 'com.google.android.youtube/17.36.4 (Linux; U; Android 12; GB) gzip',
+              'Referer': 'https://www.youtube.com/',
+            },
+          ),
+        );
+
+        await _player.play();
+      } finally {
+        yt.close();
+      }
     } catch (e) {
-      print('[AudioHandler] PLAYER ERROR: $e');
-      rethrow;
+      print('[AudioHandler] Error: $e');
+      // Fallback to direct AudioSource.uri if LockCachingAudioSource fails
+      try {
+        final streamUrl = await _youtubeService.getAudioStreamUrl(video.id);
+        if (streamUrl != null) {
+          await _player.setAudioSource(
+            AudioSource.uri(
+              Uri.parse(streamUrl),
+              headers: {
+                'User-Agent': 'com.google.android.youtube/17.36.4 (Linux; U; Android 12; GB) gzip',
+                'Referer': 'https://www.youtube.com/',
+              },
+            ),
+          );
+          await _player.play();
+        }
+      } catch (fallbackError) {
+        print('[AudioHandler] Fallback error: $fallbackError');
+      }
     } finally {
       _isSettingSource = false;
     }

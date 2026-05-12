@@ -231,6 +231,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
             builder: (context, snapshot) {
               return VideoCard(
                 video: video,
+                heroContext: 'search_$index',
                 isPlaying: playerState.currentVideo?.id == video.id,
                 onTap: () {
                   ref.read(playerProvider.notifier).playVideoFromList(video, state.results);
