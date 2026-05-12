@@ -6,6 +6,7 @@ import '../presentation/screens/search_screen.dart';
 import '../presentation/screens/player_screen.dart';
 import '../presentation/screens/history_screen.dart';
 import '../presentation/screens/video_player_screen.dart';
+import '../presentation/screens/tobi_screen.dart';
 
 class AppaTubeApp extends StatelessWidget {
   const AppaTubeApp({super.key});
@@ -84,6 +85,7 @@ class AppaTubeApp extends StatelessWidget {
         Routes.player: (context) => const PlayerScreen(),
         Routes.history: (context) => const HistoryScreen(),
         Routes.videoPlayer: (context) => const VideoPlayerScreen(),
+        Routes.tobi: (context) => const TobiScreen(),
       },
     );
   }

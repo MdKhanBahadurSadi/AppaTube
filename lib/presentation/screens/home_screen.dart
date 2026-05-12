@@ -28,6 +28,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: playerState.currentVideo != null ? 140 : 80),
+        child: FloatingActionButton(
+          onPressed: () => Navigator.pushNamed(context, Routes.tobi),
+          backgroundColor: const Color(0xFFE40000),
+          child: ClipOval(
+            child: Image.asset(
+              'src/appaagent.jpg',
+              width: 56,
+              height: 56,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Stack(
         children: [
           IndexedStack(
