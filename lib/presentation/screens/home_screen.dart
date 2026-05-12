@@ -83,24 +83,35 @@ class _HomeView extends ConsumerWidget {
           flexibleSpace: FlexibleSpaceBar(
             centerTitle: false,
             titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
-            title: RichText(
-              text: const TextSpan(
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'src/appa.png',
+                  height: 38,
+                  width: 38,
                 ),
-                children: [
-                  TextSpan(
-                    text: 'Appa',
-                    style: TextStyle(color: Colors.white),
+                const SizedBox(width: 8),
+                RichText(
+                  text: const TextSpan(
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: 'Appa',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      TextSpan(
+                        text: 'Tube',
+                        style: TextStyle(color: AppColors.red),
+                      ),
+                    ],
                   ),
-                  TextSpan(
-                    text: 'Tube',
-                    style: TextStyle(color: AppColors.red),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           actions: [

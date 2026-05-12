@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'routes.dart';
+import '../presentation/screens/splash_screen.dart';
 import '../presentation/screens/home_screen.dart';
 import '../presentation/screens/search_screen.dart';
 import '../presentation/screens/player_screen.dart';
@@ -74,8 +75,9 @@ class AppaTubeApp extends StatelessWidget {
           },
         ),
       ),
-      initialRoute: Routes.home,
+      initialRoute: Routes.splash,
       routes: {
+        Routes.splash: (context) => const SplashScreen(),
         Routes.home: (context) => const HomeScreen(),
         Routes.search: (context) => const SearchScreen(),
         Routes.player: (context) => const PlayerScreen(),
