@@ -76,7 +76,10 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
         },
         onEnded: (data) {
           // auto play next if queue exists
-          ref.read(playerProvider.notifier).playNext(ref.read(audioHandlerProvider));
+          ref.read(playerProvider.notifier).playNext(
+                handler: ref.read(audioHandlerProvider),
+                isManual: false,
+              );
         },
       ),
       builder: (context, player) {

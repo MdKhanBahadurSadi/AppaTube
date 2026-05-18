@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/play_mode.dart';
 import '../../core/utils/helpers.dart';
 import '../providers/player_provider.dart';
+import '../../core/constants/repeat_mode.dart';
 import '../widgets/play_mode_toggle.dart';
 
 class PlayerScreen extends ConsumerStatefulWidget {
@@ -285,12 +286,55 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> with TickerProvider
                         onPressed: () => playerNotifier.playNext(),
                       ),
                       const SizedBox(width: 16),
-                      IconButton(
-                        icon: Icon(
-                          Icons.repeat_rounded,
-                          color: playerState.isRepeat ? AppColors.red : Colors.white38,
+                      GestureDetector(
+                        onTap: () {
+                          final handler = ref.read(audioHandlerProvider);
+                          playerNotifier.cycleRepeatMode(handler);
+                          
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(ref.read(playerProvider).repeatMode.label),
+                              duration: const Duration(seconds: 1),
+                              backgroundColor: const Color(0xFF1A1A1A),
+                              behavior: SnackBarBehavior.floating,
+                              margin: const EdgeInsets.only(bottom: 100, left: 16, right: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          );
+                        },
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(
+                              playerState.repeatMode == RepeatMode.one
+                                  ? Icons.repeat_one_rounded
+                                  : Icons.repeat_rounded,
+                              color: playerState.repeatMode == RepeatMode.none
+                                  ? const Color(0xFF555555)
+                                  : AppColors.red,
+                              size: 24,
+                            ),
+                            if (playerState.repeatMode != RepeatMode.none)
+                              Positioned(
+                                bottom: -4,
+                                left: 0,
+                                right: 0,
+                                child: Center(
+                                  child: Container(
+                                    width: 4,
+                                    height: 4,
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                        onPressed: () => playerNotifier.toggleRepeat(),
                       ),
                     ],
                   ),

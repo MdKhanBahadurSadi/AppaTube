@@ -29,10 +29,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
     _searchController = TextEditingController();
     _focusNode = FocusNode();
 
-    // Auto-focus on open
+    // Fix: Request focus after frame is built to avoid "RenderBox was not laid out"
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-      setState(() => _showBackButton = true);
+      if (mounted) {
+        _focusNode.requestFocus();
+        setState(() => _showBackButton = true);
+      }
     });
   }
 

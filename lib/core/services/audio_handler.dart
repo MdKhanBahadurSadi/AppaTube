@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../../data/models/video_model.dart';
+import '../constants/repeat_mode.dart';
 import 'youtube_service.dart';
 
 class AppAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
@@ -9,12 +11,19 @@ class AppAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   final YoutubeService _youtubeService;
   bool _isSettingSource = false;
 
+  final _songCompletedController = StreamController<void>.broadcast();
+  Stream<void> get songCompletedStream => _songCompletedController.stream;
+
   AppAudioHandler(this._youtubeService) {
     _notifyAudioHandlerAboutPlaybackEvents();
   }
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
     _player.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        _songCompletedController.add(null);
+      }
+
       playbackState.add(playbackState.value.copyWith(
         controls: [
           MediaControl.skipToPrevious,
@@ -139,4 +148,16 @@ class AppAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> stop() => _player.stop();
+
+  void applyRepeatMode(RepeatMode mode) {
+    // For YouTube streaming and manual queue management, we handle looping manually in the provider.
+    // If we use just_audio's native LoopMode, it might repeat the same stream URL (which might expire)
+    // and won't trigger the 'completed' state that we listen to for auto-playing the next song.
+    _player.setLoopMode(LoopMode.off);
+  }
+
+  Future<void> customDispose() async {
+    await _songCompletedController.close();
+    await _player.dispose();
+  }
 }

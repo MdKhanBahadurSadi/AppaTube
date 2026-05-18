@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../app/routes.dart';
 import '../../core/constants/play_mode.dart';
+import '../../core/constants/repeat_mode.dart';
 import '../providers/player_provider.dart';
 
 class MiniPlayer extends ConsumerWidget {
@@ -105,6 +106,17 @@ class MiniPlayer extends ConsumerWidget {
                                       Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
+                                          if (playerState.repeatMode != RepeatMode.none)
+                                            Padding(
+                                              padding: const EdgeInsets.only(right: 8.0),
+                                              child: Icon(
+                                                playerState.repeatMode == RepeatMode.one
+                                                    ? Icons.repeat_one_rounded
+                                                    : Icons.repeat_rounded,
+                                                color: AppColors.red,
+                                                size: 14,
+                                              ),
+                                            ),
                                           IconButton(
                                             icon: const Icon(
                                               Icons.skip_previous_rounded,
