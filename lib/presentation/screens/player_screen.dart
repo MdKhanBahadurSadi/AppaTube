@@ -100,15 +100,27 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> with TickerProvider
                           letterSpacing: 1.5,
                         ),
                       ),
-                      PlayModeToggle(
-                        currentMode: playerState.playMode,
-                        onModeChanged: (mode) {
-                          if (mode == PlayMode.video) {
-                            ref.read(playerProvider.notifier).togglePlayMode();
-                            ref.read(audioHandlerProvider).pause();
-                            Navigator.pushReplacementNamed(context, Routes.videoPlayer);
-                          }
-                        },
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.auto_awesome_rounded, color: Color(0xFF8888FF)),
+                            onPressed: () => Navigator.pushNamed(
+                              context,
+                              Routes.aiInsights,
+                              arguments: playerState.currentVideo,
+                            ),
+                          ),
+                          PlayModeToggle(
+                            currentMode: playerState.playMode,
+                            onModeChanged: (mode) {
+                              if (mode == PlayMode.video) {
+                                ref.read(playerProvider.notifier).togglePlayMode();
+                                ref.read(audioHandlerProvider).pause();
+                                Navigator.pushReplacementNamed(context, Routes.videoPlayer);
+                              }
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),

@@ -7,6 +7,8 @@ import '../presentation/screens/player_screen.dart';
 import '../presentation/screens/history_screen.dart';
 import '../presentation/screens/video_player_screen.dart';
 import '../presentation/screens/tobi_screen.dart';
+import '../presentation/screens/ai_insights_screen.dart';
+import '../data/models/video_model.dart';
 
 class AppaTubeApp extends StatelessWidget {
   const AppaTubeApp({super.key});
@@ -86,6 +88,10 @@ class AppaTubeApp extends StatelessWidget {
         Routes.history: (context) => const HistoryScreen(),
         Routes.videoPlayer: (context) => const VideoPlayerScreen(),
         Routes.tobi: (context) => const TobiScreen(),
+        Routes.aiInsights: (context) {
+          final video = ModalRoute.of(context)!.settings.arguments as VideoModel;
+          return AiInsightsScreen(video: video);
+        },
       },
     );
   }

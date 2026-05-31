@@ -6,4 +6,5 @@ class Routes {
   static const String history = '/history';
   static const videoPlayer = '/video-player';
   static const tobi = '/tobi';
+  static const aiInsights = '/ai-insights';
 }

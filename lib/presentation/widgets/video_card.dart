@@ -192,6 +192,56 @@ class VideoCard extends ConsumerWidget {
                 ),
               ],
             ),
+            
+            // AI Insights Button
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.pushNamed(
+                  context,
+                  Routes.aiInsights,
+                  arguments: video,
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                margin: const EdgeInsets.only(top: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0A0A1A),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: const Color(0xFF4444FF).withOpacity(0.4),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.auto_awesome_rounded,
+                      color: Color(0xFF8888FF), size: 20),
+                    const SizedBox(width: 8),
+                    const Text('AI Insights',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4444FF).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text('BETA',
+                        style: TextStyle(
+                          color: Color(0xFF8888FF),
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 20),
           ],
         ),
