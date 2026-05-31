@@ -32,8 +32,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
     // Fix: Request focus after frame is built to avoid "RenderBox was not laid out"
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _focusNode.requestFocus();
         setState(() => _showBackButton = true);
+        
+        // Only request focus automatically if it's NOT a sub-page (e.g., opened via Navigator)
+        if (!widget.isSubPage) {
+          // Delay focus slightly to ensure the layout is stable
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (mounted) {
+              _focusNode.requestFocus();
+            }
+          });
+        }
       }
     });
   }

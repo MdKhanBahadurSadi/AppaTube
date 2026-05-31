@@ -21,6 +21,13 @@ AppaTube is a high-performance, feature-rich YouTube client built with Flutter. 
 - ⚡ **Offline First**: Fast loading with cached thumbnails and local metadata storage.
 - 🛠️ **Cross-Platform**: Designed to run smoothly on both Android and iOS.
 
+## 📸 Screenshots
+
+| | | | |
+|:---:|:---:|:---:|:---:|
+| <img src="screenshot/appa1.jpg" width="200"> | <img src="screenshot/appa2.jpg" width="200"> | <img src="screenshot/appa3.jpg" width="200"> | <img src="screenshot/appa4.jpg" width="200"> |
+| <img src="screenshot/appa5.jpg" width="200"> | <img src="screenshot/appa6.jpg" width="200"> | <img src="screenshot/appa7.jpg" width="200"> | <img src="screenshot/appa8.jpg" width="200"> |
+
 ## 🚀 Tech Stack
 
 - **Framework**: [Flutter](https://flutter.dev/)
